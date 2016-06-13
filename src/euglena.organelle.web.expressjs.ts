@@ -7,8 +7,8 @@
 /// <reference path="../typings/express-session/express-session.d.ts" />
 
 "use strict";
-import {cessnalib} from "../node_modules/cessnalib/cessnalib/src/cessnalib";
-import {cessnalib_template} from "../node_modules/cessnalib/cessnalib_template/src/cessnalib_template";
+import {euglena} from "../node_modules/euglena/euglena/src/euglena";
+import {euglena_template} from "../node_modules/euglena/euglena_template/src/euglena_template";
 
 import * as express from 'express';
 import favicon = require('serve-favicon');
@@ -18,45 +18,79 @@ import bodyParser = require('body-parser');
 import session = require('express-session');
 import * as path from "path";
 import * as http from "http";
+import constants = euglena_template.being.alive.constants;
+import particles = euglena_template.being.alive.particles;
 
-import Particle = cessnalib.being.Particle;
+import Particle = euglena.being.Particle;
+import interaction = euglena.being.interaction;
 
 const OrganelleName = "WebOrganelleImplExpressJs";
 let organelle = null;
 
-let this_:Organelle = null;
+let this_: Organelle = null;
 
-var vallueCell = new cessnalib.sys.type.Map<string,Particle>();
+function impactReceived(impact, of) {
+    return new euglena_template.being.alive.particles.ImpactReceived(impact, of);
+}
 
-export class Organelle extends cessnalib_template.being.alive.organelles.WebOrganelle {
-    private router:express.Router = null;
-    private server:http.Server = null;
-    constructor(){
+function reference(name, of) {
+    return new euglena.being.alive.dna.ParticleReference(name, of);
+}
+
+function particle_(name: string, content: any, of: string) {
+    return new Particle(name, content, of);
+}
+
+export class Organelle extends euglena_template.being.alive.organelles.WebOrganelle {
+    private router: express.Router = null;
+    private server: http.Server = null;
+    constructor() {
         super(OrganelleName);
         this.router = express.Router();
         this_ = this;
-        this.router.post("/", function(req, res, next) {
-            console.log("dfdfdfdfdf : "+JSON.stringify(req));
-            this_.nucleus.receiveParticle(new cessnalib_template.being.alive.particles.ImpactReceived(req.params,this_.name));
-            let result = {result:"ok"};
-            res.send(JSON.stringify(result));
+        this.router.post("/", function (req, res, next) {
+            this_.send(impactReceived(req.body, this_.name), (particle) => {
+                res.send(JSON.stringify(particle));
+            });
         });
-        this.router.get("/:path", function(req, res, next) {
+        this.router.get("/", function (req, res, next) {
             let path = req.params.path;
-            res.render(path?path:"index");
+            let euglenaName = req.headers["host"];
+            res.render(this_.getView(path));
+        });
+        this.router.get("/:path", function (req, res, next) {
+            let domain = req.headers["host"];
+            let path = req.params.path;
+            let euglenaName = domain + "/" + path;
+            res.render(this_.getView(path));
+        });
+        this.router.get("/debug/:domain", function (req, res, next) {
+            let domain = req.params.domain;
+            let path = req.params.path;
+            let euglenaName = domain;
+            res.render(this_.getView(path));
+        });
+        this.router.get("/debug/:domain/:path", function (req, res, next) {
+            let domain = req.params.domain;
+            let path = req.params.path;
+            let euglenaName = domain + "/" + path;
+            res.render(this_.getView(path));
         });
     }
-    private serve(){
+    private getView(path): string {
+        return (path ? path : "index") + "/view";
+    }
+    private serve() {
         let app = express();
         // view engine setup
         let appDir = path.dirname(require.main.filename);
-        app.set('views', path.join(appDir,'../', 'views'));
+        app.set('views', path.join(appDir, '../', 'views'));
         app.set('view engine', 'jade');
         // uncomment after placing your favicon in /public
         //app.use(favicon(path.join(__dirname,"../", 'public', 'favicon.ico')));
         app.use(logger('dev'));
-        app.use(bodyParser.json({limit: '50mb'}));
-        app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+        app.use(bodyParser.json({ limit: '50mb' }));
+        app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
         //app.use(bodyParser.json());
         //app.use(bodyParser.urlencoded({ extended: false }));
         app.use(cookieParser());
@@ -66,7 +100,7 @@ export class Organelle extends cessnalib_template.being.alive.organelles.WebOrga
             resave: true,
             saveUninitialized: true
         }));
-        app.use(express.static(path.join(appDir,'../', 'public')));
+        app.use(express.static(path.join(appDir, '../', 'public')));
         app.use('/', this.router);
         app.use((req, res, next) => {
             var session: any = req.session;
@@ -80,20 +114,20 @@ export class Organelle extends cessnalib_template.being.alive.organelles.WebOrga
             next();
         });
         // catch 404 and forward to error handler
-        app.use((req, res, next)=> {
+        app.use((req, res, next) => {
             var err = new Error('Not Found');
             err.status = 404;
             next(err);
         });
-        
-        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction)=> {
+
+        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
             res.status(err.status || 500);
             res.render('error', {
                 message: err.message,
                 error: {}
             });
         });
-        
+
         var server = http.createServer(app);
 
         /**
@@ -135,10 +169,10 @@ export class Organelle extends cessnalib_template.being.alive.organelles.WebOrga
                 throw error;
         }
     }
-    public receiveParticle(particle:Particle):void{
-        console.log("Organelle Web says 'received particle: "+particle.name+"'");
+    public receive(particle: Particle, response: interaction.Response): void {
+        console.log("Organelle Web says 'received particle: " + particle.name + "'");
         switch (particle.name) {
-            case cessnalib_template.being.ghost.euglena.web.constants.incomingparticles.Serve:
+            case euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
                 this.serve();
                 break;
             default:

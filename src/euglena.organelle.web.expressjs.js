@@ -5,8 +5,13 @@
 /// <reference path="../typings/body-parser/body-parser.d.ts" />
 /// <reference path="../typings/express-session/express-session.d.ts" />
 "use strict";
-var cessnalib_1 = require("../node_modules/cessnalib/cessnalib/src/cessnalib");
-var cessnalib_template_1 = require("../node_modules/cessnalib/cessnalib_template/src/cessnalib_template");
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var euglena_1 = require("../node_modules/euglena/euglena/src/euglena");
+var euglena_template_1 = require("../node_modules/euglena/euglena_template/src/euglena_template");
 var express = require('express');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -14,35 +19,63 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var path = require("path");
 var http = require("http");
-const OrganelleName = "WebOrganelleImplExpressJs";
-let organelle = null;
-let this_ = null;
-var vallueCell = new cessnalib_1.cessnalib.sys.type.Map();
-class Organelle extends cessnalib_template_1.cessnalib_template.being.alive.organelles.WebOrganelle {
-    constructor() {
-        super(OrganelleName);
+var Particle = euglena_1.euglena.being.Particle;
+var OrganelleName = "WebOrganelleImplExpressJs";
+var organelle = null;
+var this_ = null;
+function impactReceived(impact, of) {
+    return new euglena_template_1.euglena_template.being.alive.particles.ImpactReceived(impact, of);
+}
+function reference(name, of) {
+    return new euglena_1.euglena.being.alive.dna.ParticleReference(name, of);
+}
+function particle_(name, content, of) {
+    return new Particle(name, content, of);
+}
+var Organelle = (function (_super) {
+    __extends(Organelle, _super);
+    function Organelle() {
+        _super.call(this, OrganelleName);
         this.router = null;
         this.server = null;
         this.router = express.Router();
         this_ = this;
         this.router.post("/", function (req, res, next) {
-            console.log("test")
-            try{console.log(JSON.stringify(req.body));}catch(e){
-                console.log(e.message);
-            }
-            this_.nucleus.receiveParticle(new cessnalib_template_1.cessnalib_template.being.alive.particles.ImpactReceived(req.body, this_.name));
-            let result = { result: "ok" };
-            res.send(JSON.stringify(result));
+            this_.send(impactReceived(req.body, this_.name), function (particle) {
+                res.send(JSON.stringify(particle));
+            });
+        });
+        this.router.get("/", function (req, res, next) {
+            var path = req.params.path;
+            var euglenaName = req.headers["host"];
+            res.render(this_.getView(path));
         });
         this.router.get("/:path", function (req, res, next) {
-            let path = req.params.path;
-            res.render(path ? path : "index");
+            var domain = req.headers["host"];
+            var path = req.params.path;
+            var euglenaName = domain + "/" + path;
+            res.render(this_.getView(path));
+        });
+        this.router.get("/debug/:domain", function (req, res, next) {
+            var domain = req.params.domain;
+            var path = req.params.path;
+            var euglenaName = domain;
+            res.render(this_.getView(path));
+        });
+        this.router.get("/debug/:domain/:path", function (req, res, next) {
+            var domain = req.params.domain;
+            var path = req.params.path;
+            var euglenaName = domain + "/" + path;
+            res.render(this_.getView(path));
         });
     }
-    serve() {
-        let app = express();
+    Organelle.prototype.getView = function (path) {
+        return (path ? path : "index") + "/view";
+    };
+    Organelle.prototype.serve = function () {
+        var app = express();
         // view engine setup
-        let appDir = path.dirname(require.main.filename);
+        var appDir = path.dirname(require.main.filename);
         app.set('views', path.join(appDir, '../', 'views'));
         app.set('view engine', 'jade');
         // uncomment after placing your favicon in /public
@@ -61,7 +94,7 @@ class Organelle extends cessnalib_template_1.cessnalib_template.being.alive.orga
         }));
         app.use(express.static(path.join(appDir, '../', 'public')));
         app.use('/', this.router);
-        app.use((req, res, next) => {
+        app.use(function (req, res, next) {
             var session = req.session;
             var err = session.error, msg = session.success;
             delete session.error;
@@ -74,12 +107,12 @@ class Organelle extends cessnalib_template_1.cessnalib_template.being.alive.orga
             next();
         });
         // catch 404 and forward to error handler
-        app.use((req, res, next) => {
+        app.use(function (req, res, next) {
             var err = new Error('Not Found');
             err.status = 404;
             next(err);
         });
-        app.use((err, req, res, next) => {
+        app.use(function (err, req, res, next) {
             res.status(err.status || 500);
             res.render('error', {
                 message: err.message,
@@ -94,15 +127,15 @@ class Organelle extends cessnalib_template_1.cessnalib_template.being.alive.orga
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
-    }
-    onListening() {
+    };
+    Organelle.prototype.onListening = function () {
         var addr = this_.server.address();
         var bind = typeof addr === 'string'
             ? 'pipe ' + addr
             : 'port ' + addr.port;
         console.log('Listening on ' + bind);
-    }
-    onError(error) {
+    };
+    Organelle.prototype.onError = function (error) {
         if (error.syscall !== 'listen') {
             throw error;
         }
@@ -122,17 +155,18 @@ class Organelle extends cessnalib_template_1.cessnalib_template.being.alive.orga
             default:
                 throw error;
         }
-    }
-    receiveParticle(particle) {
+    };
+    Organelle.prototype.receive = function (particle, response) {
         console.log("Organelle Web says 'received particle: " + particle.name + "'");
         switch (particle.name) {
-            case cessnalib_template_1.cessnalib_template.being.ghost.euglena.web.constants.incomingparticles.Serve:
+            case euglena_template_1.euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
                 this.serve();
                 break;
             default:
                 break;
         }
-    }
-}
+    };
+    return Organelle;
+})(euglena_template_1.euglena_template.being.alive.organelles.WebOrganelle);
 exports.Organelle = Organelle;
 //# sourceMappingURL=euglena.organelle.web.expressjs.js.map
