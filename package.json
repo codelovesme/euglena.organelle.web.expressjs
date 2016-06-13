@@ -1,0 +1,21 @@
+{
+  "name": "euglena.organelle.web.expressjs",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/euglena.organelle.web.expressjs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "codelovesme",
+  "license": "GPL v2",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "cookie-parser": "^1.4.1",
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "jade": "^1.11.0",
+    "mongodb": "^2.1.14",
+    "morgan": "^1.7.0",
+    "serve-favicon": "^2.3.0"
+  }
+}
