@@ -4,25 +4,21 @@
 /// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
 /// <reference path="../typings/body-parser/body-parser.d.ts" />
 /// <reference path="../typings/express-session/express-session.d.ts" />
+/// <reference path="../typings/node/node.d.ts"/>
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var euglena_1 = require("../node_modules/euglena/euglena/src/euglena");
-var euglena_template_1 = require("../node_modules/euglena/euglena_template/src/euglena_template");
-var express = require('express');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var path = require("path");
-var http = require("http");
+const euglena_1 = require("euglena");
+const euglena_template_1 = require("euglena.template");
+const express = require('express');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const path = require("path");
+const http = require("http");
 var Particle = euglena_1.euglena.being.Particle;
-var OrganelleName = "WebOrganelleImplExpressJs";
-var organelle = null;
-var this_ = null;
+const OrganelleName = "WebOrganelleImplExpressJs";
+let organelle = null;
+let this_ = null;
 function impactReceived(impact, of) {
     return new euglena_template_1.euglena_template.being.alive.particles.ImpactReceived(impact, of);
 }
@@ -32,50 +28,49 @@ function reference(name, of) {
 function particle_(name, content, of) {
     return new Particle(name, content, of);
 }
-var Organelle = (function (_super) {
-    __extends(Organelle, _super);
-    function Organelle() {
-        _super.call(this, OrganelleName);
+class Organelle extends euglena_template_1.euglena_template.being.alive.organelles.WebOrganelle {
+    constructor() {
+        super(OrganelleName);
         this.router = null;
         this.server = null;
         this.router = express.Router();
         this_ = this;
         this.router.post("/", function (req, res, next) {
-            this_.send(impactReceived(req.body, this_.name), function (particle) {
+            this_.send(impactReceived(req.body, this_.name), (particle) => {
                 res.send(JSON.stringify(particle));
             });
         });
         this.router.get("/", function (req, res, next) {
-            var path = req.params.path;
-            var euglenaName = req.headers["host"];
+            let path = req.params.path;
+            let euglenaName = req.headers["host"];
             res.render(this_.getView(path));
         });
         this.router.get("/:path", function (req, res, next) {
-            var domain = req.headers["host"];
-            var path = req.params.path;
-            var euglenaName = domain + "/" + path;
+            let domain = req.headers["host"];
+            let path = req.params.path;
+            let euglenaName = domain + "/" + path;
             res.render(this_.getView(path));
         });
         this.router.get("/debug/:domain", function (req, res, next) {
-            var domain = req.params.domain;
-            var path = req.params.path;
-            var euglenaName = domain;
+            let domain = req.params.domain;
+            let path = req.params.path;
+            let euglenaName = domain;
             res.render(this_.getView(path));
         });
         this.router.get("/debug/:domain/:path", function (req, res, next) {
-            var domain = req.params.domain;
-            var path = req.params.path;
-            var euglenaName = domain + "/" + path;
+            let domain = req.params.domain;
+            let path = req.params.path;
+            let euglenaName = domain + "/" + path;
             res.render(this_.getView(path));
         });
     }
-    Organelle.prototype.getView = function (path) {
+    getView(path) {
         return (path ? path : "index") + "/view";
-    };
-    Organelle.prototype.serve = function () {
-        var app = express();
+    }
+    serve() {
+        let app = express();
         // view engine setup
-        var appDir = path.dirname(require.main.filename);
+        let appDir = path.dirname(require.main.filename);
         app.set('views', path.join(appDir, '../', 'views'));
         app.set('view engine', 'jade');
         // uncomment after placing your favicon in /public
@@ -94,7 +89,7 @@ var Organelle = (function (_super) {
         }));
         app.use(express.static(path.join(appDir, '../', 'public')));
         app.use('/', this.router);
-        app.use(function (req, res, next) {
+        app.use((req, res, next) => {
             var session = req.session;
             var err = session.error, msg = session.success;
             delete session.error;
@@ -107,12 +102,12 @@ var Organelle = (function (_super) {
             next();
         });
         // catch 404 and forward to error handler
-        app.use(function (req, res, next) {
+        app.use((req, res, next) => {
             var err = new Error('Not Found');
             err.status = 404;
             next(err);
         });
-        app.use(function (err, req, res, next) {
+        app.use((err, req, res, next) => {
             res.status(err.status || 500);
             res.render('error', {
                 message: err.message,
@@ -127,15 +122,15 @@ var Organelle = (function (_super) {
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
-    };
-    Organelle.prototype.onListening = function () {
+    }
+    onListening() {
         var addr = this_.server.address();
         var bind = typeof addr === 'string'
             ? 'pipe ' + addr
             : 'port ' + addr.port;
         console.log('Listening on ' + bind);
-    };
-    Organelle.prototype.onError = function (error) {
+    }
+    onError(error) {
         if (error.syscall !== 'listen') {
             throw error;
         }
@@ -155,8 +150,8 @@ var Organelle = (function (_super) {
             default:
                 throw error;
         }
-    };
-    Organelle.prototype.receive = function (particle, response) {
+    }
+    receive(particle, response) {
         console.log("Organelle Web says 'received particle: " + particle.name + "'");
         switch (particle.name) {
             case euglena_template_1.euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
@@ -165,8 +160,7 @@ var Organelle = (function (_super) {
             default:
                 break;
         }
-    };
-    return Organelle;
-})(euglena_template_1.euglena_template.being.alive.organelles.WebOrganelle);
+    }
+}
 exports.Organelle = Organelle;
 //# sourceMappingURL=euglena.organelle.web.expressjs.js.map

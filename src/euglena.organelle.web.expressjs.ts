@@ -5,10 +5,11 @@
 /// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
 /// <reference path="../typings/body-parser/body-parser.d.ts" />
 /// <reference path="../typings/express-session/express-session.d.ts" />
+/// <reference path="../typings/node/node.d.ts"/>
 
 "use strict";
-import {euglena} from "../node_modules/euglena/euglena/src/euglena";
-import {euglena_template} from "../node_modules/euglena/euglena_template/src/euglena_template";
+import {euglena} from "euglena";
+import {euglena_template} from "euglena.template";
 
 import * as express from 'express';
 import favicon = require('serve-favicon');
@@ -25,15 +26,15 @@ import Particle = euglena.being.Particle;
 import interaction = euglena.being.interaction;
 
 const OrganelleName = "WebOrganelleImplExpressJs";
-let organelle = null;
+let organelle:Organelle = null;
 
 let this_: Organelle = null;
 
-function impactReceived(impact, of) {
+function impactReceived(impact:euglena.being.interaction.Impact, of:string) {
     return new euglena_template.being.alive.particles.ImpactReceived(impact, of);
 }
 
-function reference(name, of) {
+function reference(name:string, of:string) {
     return new euglena.being.alive.dna.ParticleReference(name, of);
 }
 
@@ -77,7 +78,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             res.render(this_.getView(path));
         });
     }
-    private getView(path): string {
+    private getView(path:string): string {
         return (path ? path : "index") + "/view";
     }
     private serve() {
@@ -115,7 +116,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         });
         // catch 404 and forward to error handler
         app.use((req, res, next) => {
-            var err = new Error('Not Found');
+            var err:any = new Error('Not Found');
             err.status = 404;
             next(err);
         });
@@ -146,7 +147,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             : 'port ' + addr.port;
         console.log('Listening on ' + bind);
     }
-    onError(error) {
+    onError(error:any) {
         if (error.syscall !== 'listen') {
             throw error;
         }
