@@ -79,7 +79,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         });
     }
     private getView(path:string): string {
-        return "views/"+(path ? path : "index");
+        return (path ? path : "index");
     }
     private serve() {
         let app = express();
