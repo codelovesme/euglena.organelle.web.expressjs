@@ -65,7 +65,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         });
     }
     getView(path) {
-        return "view/" + (path ? path : "index");
+        return "views/" + (path ? path : "index");
     }
     serve() {
         let app = express();
