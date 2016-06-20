@@ -6,6 +6,8 @@
 /// <reference path="../typings/body-parser/body-parser.d.ts" />
 /// <reference path="../typings/express-session/express-session.d.ts" />
 /// <reference path="../typings/node/node.d.ts"/>
+/// <reference path="../node_modules/euglena.template/src/index.d.ts"/>
+
 
 "use strict";
 import {euglena} from "euglena";
@@ -50,9 +52,16 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         this.router = express.Router();
         this_ = this;
         this.router.post("/", function (req, res, next) {
+            let session:any = req.session;
+            req.body.token = session.token;
             this_.send(impactReceived(req.body, this_.name), (particle) => {
                 res.send(JSON.stringify(particle));
             });
+        });
+        this.router.post("/auth",function(req,res,next){
+            let session:any = req.session;
+            session.token = req.body.content;
+            res.send(JSON.stringify(new euglena_template.being.alive.particles.Acknowledge("euglena.organelle.web")));
         });
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;

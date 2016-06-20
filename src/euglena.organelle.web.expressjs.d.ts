@@ -5,6 +5,7 @@
 /// <reference path="../typings/body-parser/body-parser.d.ts" />
 /// <reference path="../typings/express-session/express-session.d.ts" />
 /// <reference path="../typings/node/node.d.ts" />
+/// <reference path="../node_modules/euglena.template/src/index.d.ts" />
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
 import Particle = euglena.being.Particle;
