@@ -28,15 +28,15 @@ import Particle = euglena.being.Particle;
 import interaction = euglena.being.interaction;
 
 const OrganelleName = "WebOrganelleImplExpressJs";
-let organelle:Organelle = null;
+let organelle: Organelle = null;
 
 let this_: Organelle = null;
 
-function impactReceived(impact:euglena.being.interaction.Impact, of:string) {
+function impactReceived(impact: euglena.being.interaction.Impact, of: string) {
     return new euglena_template.being.alive.particles.ImpactReceived(impact, of);
 }
 
-function reference(name:string, of:string) {
+function reference(name: string, of: string) {
     return new euglena.being.alive.dna.ParticleReference(name, of);
 }
 
@@ -52,15 +52,19 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         this.router = express.Router();
         this_ = this;
         this.router.post("/", function (req, res, next) {
-            let session:any = req.session;
+            let session: any = req.session;
             req.body.token = session.token;
             this_.send(impactReceived(req.body, this_.name), (particle) => {
                 res.send(JSON.stringify(particle));
             });
         });
-        this.router.post("/auth",function(req,res,next){
-            let session:any = req.session;
-            session.token = req.body.content;
+        this.router.post("/auth", function (req, res, next) {
+            let session: any = req.session;
+            let token = session.token = req.body.content;
+            let of = req.body.of;
+            this_.send(new euglena_template.being.ghost.organelle.web.outgoingparticles.Session({token:token},of),(particle:Particle)=>{
+                console.log("Session saved.");
+            });
             res.send(JSON.stringify(new euglena_template.being.alive.particles.Acknowledge("euglena.organelle.web")));
         });
         this.router.get("/", function (req, res, next) {
@@ -87,7 +91,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             res.render(this_.getView(path));
         });
     }
-    private getView(path:string): string {
+    private getView(path: string): string {
         return (path ? path : "index");
     }
     private serve() {
@@ -125,7 +129,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         });
         // catch 404 and forward to error handler
         app.use((req, res, next) => {
-            var err:any = new Error('Not Found');
+            var err: any = new Error('Not Found');
             err.status = 404;
             next(err);
         });
@@ -156,7 +160,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             : 'port ' + addr.port;
         console.log('Listening on ' + bind);
     }
-    onError(error:any) {
+    onError(error: any) {
         if (error.syscall !== 'listen') {
             throw error;
         }
