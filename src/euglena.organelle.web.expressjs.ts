@@ -64,8 +64,8 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             let of = req.body.of;
             this_.send(new euglena_template.being.ghost.organelle.web.outgoingparticles.Session({token:token},of),(particle:Particle)=>{
                 console.log("Session saved.");
-                res.send(JSON.stringify(new euglena_template.being.alive.particles.Acknowledge("euglena.organelle.web")));
             });
+            res.send(JSON.stringify(new euglena_template.being.alive.particles.Acknowledge("euglena.organelle.web")));
         });
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;

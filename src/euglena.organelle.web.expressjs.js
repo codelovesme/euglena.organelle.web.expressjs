@@ -49,8 +49,8 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             let of = req.body.of;
             this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.web.outgoingparticles.Session({ token: token }, of), (particle) => {
                 console.log("Session saved.");
-                res.send(JSON.stringify(new euglena_template_1.euglena_template.being.alive.particles.Acknowledge("euglena.organelle.web")));
             });
+            res.send(JSON.stringify(new euglena_template_1.euglena_template.being.alive.particles.Acknowledge("euglena.organelle.web")));
         });
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
