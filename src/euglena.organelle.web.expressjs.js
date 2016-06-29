@@ -163,7 +163,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
                 throw error;
         }
     }
-    receive(particle, response) {
+    receive(particle) {
         console.log("Organelle Web says 'received particle: " + particle.name + "'");
         switch (particle.name) {
             case euglena_template_1.euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:

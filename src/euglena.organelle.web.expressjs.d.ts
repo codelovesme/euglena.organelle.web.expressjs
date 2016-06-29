@@ -9,7 +9,6 @@
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
 import Particle = euglena.being.Particle;
-import interaction = euglena.being.interaction;
 export declare class Organelle extends euglena_template.being.alive.organelles.WebOrganelle {
     private router;
     private server;
@@ -18,5 +17,5 @@ export declare class Organelle extends euglena_template.being.alive.organelles.W
     private serve();
     onListening(): void;
     onError(error: any): void;
-    receive(particle: Particle, response: interaction.Response): void;
+    receive(particle: Particle): void;
 }

@@ -183,7 +183,7 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
                 throw error;
         }
     }
-    public receive(particle: Particle, response: interaction.Response): void {
+    public receive(particle: Particle): void {
         console.log("Organelle Web says 'received particle: " + particle.name + "'");
         switch (particle.name) {
             case euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
