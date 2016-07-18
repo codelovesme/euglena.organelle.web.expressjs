@@ -161,14 +161,11 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         /**
          * Listen on provided port, on all network interfaces.
          */
-
+        let socket = io.listen(server);
         server.listen(this.initialProperties.port);
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
-
-        let socket = io.listen(server);
-        server.listen(this.initialProperties.port);
         socket.on("connection", (socket: any) => {
             socket.on("bind", (euglenaInfo: euglena_template.being.alive.particles.EuglenaInfo) => {
                 this.sockets[euglenaInfo.name] = socket;

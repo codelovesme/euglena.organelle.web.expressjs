@@ -141,12 +141,11 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         /**
          * Listen on provided port, on all network interfaces.
          */
+        let socket = io.listen(server);
         server.listen(this.initialProperties.port);
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
-        let socket = io.listen(server);
-        server.listen(this.initialProperties.port);
         socket.on("connection", (socket) => {
             socket.on("bind", (euglenaInfo) => {
                 this.sockets[euglenaInfo.name] = socket;
