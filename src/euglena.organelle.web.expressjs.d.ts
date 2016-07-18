@@ -1,4 +1,5 @@
 /// <reference path="../typings/express/express.d.ts" />
+/// <reference path="../typings/socket.io/socket.io.d.ts" />
 /// <reference path="../typings/serve-favicon/serve-favicon.d.ts" />
 /// <reference path="../typings/morgan/morgan.d.ts" />
 /// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
@@ -8,14 +9,25 @@
 /// <reference path="../node_modules/euglena.template/src/index.d.ts" />
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
+import * as http from "http";
 import Particle = euglena.being.Particle;
 export declare class Organelle extends euglena_template.being.alive.organelles.WebOrganelle {
     private router;
     private server;
+    private sockets;
+    private servers;
+    private httpConnector;
     constructor();
     private getView(path);
+    receive(particle: Particle): void;
     private serve();
     onListening(): void;
     onError(error: any): void;
-    receive(particle: Particle): void;
+    private connectToEuglena(euglenaInfo);
+    private throwImpact(to, impact);
+}
+export declare class HttpRequestManager {
+    post_options: http.RequestOptions;
+    constructor(post_options: http.RequestOptions);
+    sendMessage(message: string, callback: euglena.sys.type.Callback<string>): void;
 }

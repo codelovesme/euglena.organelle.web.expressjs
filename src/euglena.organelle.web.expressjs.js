@@ -1,4 +1,5 @@
 /// <reference path="../typings/express/express.d.ts" />
+/// <reference path="../typings/socket.io/socket.io.d.ts" />
 /// <reference path="../typings/serve-favicon/serve-favicon.d.ts" />
 /// <reference path="../typings/morgan/morgan.d.ts" />
 /// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
@@ -16,7 +17,9 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require("path");
 const http = require("http");
+const io = require("socket.io");
 var Particle = euglena_1.euglena.being.Particle;
+var Exception = euglena_1.euglena.sys.type.Exception;
 const OrganelleName = "WebOrganelleImplExpressJs";
 let organelle = null;
 let this_ = null;
@@ -35,6 +38,8 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         this.router = null;
         this.server = null;
         this.router = express.Router();
+        this.sockets = {};
+        this.servers = {};
         this_ = this;
         this.router.post("/", function (req, res, next) {
             let session = req.session;
@@ -74,6 +79,16 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
     }
     getView(path) {
         return (path ? path : "index");
+    }
+    receive(particle) {
+        console.log("Organelle Web says 'received particle: " + particle.name + "'");
+        switch (particle.name) {
+            case euglena_template_1.euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
+                this.serve();
+                break;
+            default:
+                break;
+        }
     }
     serve() {
         let app = express();
@@ -130,6 +145,17 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
+        let socket = io.listen(server);
+        server.listen(this.initialProperties.port);
+        socket.on("connection", (socket) => {
+            socket.on("bind", (euglenaInfo) => {
+                this.sockets[euglenaInfo.name] = socket;
+                this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.ConnectedToEuglena(euglenaInfo, this_.name));
+            });
+            socket.on("impact", (impactAssumption) => {
+                this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.ImpactReceived(impactAssumption, euglena_template_1.euglena_template.being.alive.constants.organelles.Net));
+            });
+        });
     }
     onListening() {
         var addr = this_.server.address();
@@ -159,16 +185,114 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
                 throw error;
         }
     }
-    receive(particle) {
-        console.log("Organelle Web says 'received particle: " + particle.name + "'");
-        switch (particle.name) {
-            case euglena_template_1.euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
-                this.serve();
-                break;
-            default:
-                break;
+    connectToEuglena(euglenaInfo) {
+        if (this.servers[euglenaInfo.name]) {
+            return;
+        }
+        var post_options;
+        post_options.host = euglenaInfo.url;
+        post_options.port = Number(euglenaInfo.port);
+        post_options.path = "/";
+        post_options.method = 'POST';
+        post_options.headers = {
+            'Content-Type': 'application/json'
+        };
+        let server = io("http://" + post_options.host + ":" + post_options.port);
+        this.servers[euglenaInfo.name] = server;
+        server.on("connect", (socket) => {
+            server.emit("bind", this_.initialProperties.euglenaInfo, (done) => {
+                if (done) {
+                    this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.ConnectedToEuglena(euglenaInfo, this_.name));
+                }
+            });
+            server.on("impact", (impactAssumption, callback) => {
+                if (euglena_1.euglena.js.Class.instanceOf(euglena_template_1.euglena_template.reference.being.interaction.Impact, impactAssumption)) {
+                    this.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.ImpactReceived(impactAssumption, OrganelleName));
+                }
+                else {
+                }
+            });
+        });
+        server.on("disconnect", () => {
+            this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.DisconnectedFromEuglena(euglenaInfo, this_.name));
+        });
+    }
+    throwImpact(to, impact) {
+        var client = this.sockets[to.name];
+        if (client) {
+            client.emit("impact", impact, (resp) => {
+                //TODO
+            });
+        }
+        else {
+            //TODO
+            //response(new euglena_template.being.alive.particles.ExceptionOccurred(
+            //  new euglena.sys.type.Exception("There is no gateway connected with that id: " + userId)));
+            let server = this.servers[to.name];
+            if (server) {
+                server.emit("impact", impact);
+            }
+            else {
+                //TODO
+                var post_options = {
+                    host: to.url,
+                    port: Number(to.port),
+                    path: "/",
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                let httpConnector = new HttpRequestManager(post_options);
+                httpConnector.sendMessage(JSON.stringify(impact), (message) => {
+                    if (euglena_1.euglena.sys.type.StaticTools.Exception.isNotException(message)) {
+                        try {
+                            let impactAssumption = JSON.parse(message);
+                            if (euglena_1.euglena.js.Class.instanceOf(euglena_template_1.euglena_template.reference.being.interaction.Impact, impactAssumption)) {
+                                this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.ImpactReceived(impactAssumption, OrganelleName));
+                            }
+                            else {
+                            }
+                        }
+                        catch (e) {
+                        }
+                    }
+                    else {
+                        //TODO write a eligable exception message
+                        this_.send(new euglena_template_1.euglena_template.being.alive.particles.Exception(new Exception(""), OrganelleName));
+                    }
+                });
+            }
         }
     }
 }
 exports.Organelle = Organelle;
+class HttpRequestManager {
+    constructor(post_options) {
+        this.post_options = post_options;
+    }
+    sendMessage(message, callback) {
+        var req = http.request(this.post_options, (res) => {
+            res.setEncoding('utf8');
+            var str = '';
+            res.on('data', (data) => {
+                str += data;
+            });
+            res.on('end', (data) => {
+                callback(str);
+            });
+        });
+        req.setTimeout(10000, () => {
+            req.abort();
+            callback(new Exception("Request timed out."));
+        });
+        req.on('error', (e) => {
+            callback(new Exception("problem with request: " + e.message));
+        });
+        if (message)
+            req.write(message);
+        req.end();
+    }
+}
+exports.HttpRequestManager = HttpRequestManager;
 //# sourceMappingURL=euglena.organelle.web.expressjs.js.map
