@@ -10,7 +10,6 @@
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
 import * as http from "http";
-import Particle = euglena.being.Particle;
 export declare class Organelle extends euglena_template.being.alive.organelles.WebOrganelle {
     private router;
     private server;
@@ -18,11 +17,10 @@ export declare class Organelle extends euglena_template.being.alive.organelles.W
     private servers;
     private httpConnector;
     constructor();
+    protected onGettingAlive(): void;
     private getView(path);
-    receive(particle: Particle): void;
-    private serve();
-    onListening(): void;
-    onError(error: any): void;
+    private onListening();
+    private onError(error);
     private connectToEuglena(euglenaInfo);
     private throwImpact(to, impact);
 }

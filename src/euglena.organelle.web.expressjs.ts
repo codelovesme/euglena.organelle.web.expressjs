@@ -55,10 +55,14 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
     private httpConnector: HttpRequestManager;
     constructor() {
         super(OrganelleName);
+        this_ = this;
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
-        this_ = this;
+        //todo addAction connectEuglena
+        //todo addAction throwImpact
+    }
+    protected onGettingAlive(): void{
         this.router.post("/", function (req, res, next) {
             let session: any = req.session;
             req.body.token = session.token;
@@ -94,21 +98,6 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             let euglenaName = domain + "/" + path;
             res.render(this_.getView(path));
         });
-    }
-    private getView(path: string): string {
-        return (path ? path : "index");
-    }
-    public receive(particle: Particle): void {
-        console.log("Organelle Web says 'received particle: " + particle.name + "'");
-        switch (particle.name) {
-            case euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
-                this.serve();
-                break;
-            default:
-                break;
-        }
-    }
-    private serve() {
         let app = express();
         // view engine setup
         let appDir = path.dirname(require.main.filename);
@@ -176,14 +165,17 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
             });
         });
     }
-    onListening() {
+    private getView(path: string): string {
+        return (path ? path : "index");
+    }
+    private onListening() {
         var addr = this_.server.address();
         var bind = typeof addr === 'string'
             ? 'pipe ' + addr
             : 'port ' + addr.port;
         console.log('Listening on ' + bind);
     }
-    onError(error: any) {
+    private onError(error: any) {
         if (error.syscall !== 'listen') {
             throw error;
         }

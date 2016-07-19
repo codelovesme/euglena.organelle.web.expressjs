@@ -37,10 +37,14 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         super(OrganelleName);
         this.router = null;
         this.server = null;
+        this_ = this;
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
-        this_ = this;
+        //todo addAction connectEuglena
+        //todo addAction throwImpact
+    }
+    onGettingAlive() {
         this.router.post("/", function (req, res, next) {
             let session = req.session;
             req.body.token = session.token;
@@ -76,21 +80,6 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             let euglenaName = domain + "/" + path;
             res.render(this_.getView(path));
         });
-    }
-    getView(path) {
-        return (path ? path : "index");
-    }
-    receive(particle) {
-        console.log("Organelle Web says 'received particle: " + particle.name + "'");
-        switch (particle.name) {
-            case euglena_template_1.euglena_template.being.ghost.organelle.web.constants.incomingparticles.Serve:
-                this.serve();
-                break;
-            default:
-                break;
-        }
-    }
-    serve() {
         let app = express();
         // view engine setup
         let appDir = path.dirname(require.main.filename);
@@ -155,6 +144,9 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
                 this_.send(new euglena_template_1.euglena_template.being.ghost.organelle.reception.outgoingparticles.ImpactReceived(impactAssumption, euglena_template_1.euglena_template.being.alive.constants.organelles.Net));
             });
         });
+    }
+    getView(path) {
+        return (path ? path : "index");
     }
     onListening() {
         var addr = this_.server.address();
