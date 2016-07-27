@@ -59,8 +59,12 @@ export class Organelle extends euglena_template.being.alive.organelles.WebOrgane
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
-        //todo addAction connectEuglena
-        //todo addAction throwImpact
+        this.addAction(euglena_template.being.ghost.organelle.impacttransmitter.constants.incomingparticles.ConnectToEuglena, (particle) => {
+            this_.connectToEuglena(particle.content);
+        });
+        this.addAction(euglena_template.being.ghost.organelle.impactthrower.constants.incomingparticles.ThrowImpact, (particle) => {
+            this_.throwImpact(particle.content.to,particle.content.impact);
+        });
     }
     protected onGettingAlive(): void{
         this.router.post("/", function (req, res, next) {
