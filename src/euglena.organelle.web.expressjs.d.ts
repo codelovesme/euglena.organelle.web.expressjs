@@ -10,7 +10,7 @@
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
 import * as http from "http";
-export declare class Organelle extends euglena_template.being.alive.organelles.WebOrganelle {
+export declare class Organelle extends euglena_template.being.alive.organelle.WebOrganelle {
     private router;
     private server;
     private sockets;
