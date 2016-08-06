@@ -53,20 +53,28 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     private sockets: any;
     private servers: any;
     private httpConnector: HttpRequestManager;
+    private sapContent: euglena_template.being.alive.particle.WebOrganelleSapContent;
     constructor() {
         super(OrganelleName);
         this_ = this;
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
-        this.addAction(euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
+
+    }
+    protected bindActions(addAction: (particleName: string, action: (particle: Particle) => void) => void): void {
+        addAction(euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
             this_.connectToEuglena(particle.content);
         });
-        this.addAction(euglena_template.being.alive.constants.particles.ThrowImpact, (particle) => {
-            this_.throwImpact(particle.content.to,particle.content.impact);
+        addAction(euglena_template.being.alive.constants.particles.ThrowImpact, (particle) => {
+            this_.throwImpact(particle.content.to, particle.content.impact);
+        });
+        addAction(euglena_template.being.alive.constants.particles.WebOrganelleSap, (particle) => {
+            this_.sapContent = particle.content;
+            this_.getAlive();
         });
     }
-    protected onGettingAlive(): void{
+    private getAlive(): void {
         this.router.post("/", function (req, res, next) {
             let session: any = req.session;
             req.body.token = session.token;
@@ -155,7 +163,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
          * Listen on provided port, on all network interfaces.
          */
         let socket = io.listen(server);
-        server.listen(this.sap.euglenaInfo.port);
+        server.listen(this.sapContent.euglenaInfo.port);
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
@@ -184,9 +192,9 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             throw error;
         }
 
-        var bind = typeof this_.sap.euglenaInfo.port === 'string'
-            ? 'Pipe ' + this_.sap.euglenaInfo.port
-            : 'Port ' + this_.sap.euglenaInfo.port;
+        var bind = typeof this_.sapContent.euglenaInfo.port === 'string'
+            ? 'Pipe ' + this_.sapContent.euglenaInfo.port
+            : 'Port ' + this_.sapContent.euglenaInfo.port;
 
         // handle specific listen errors with friendly messages
         switch (error.code) {
@@ -217,7 +225,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         let server = io("http://" + post_options.host + ":" + post_options.port);
         this.servers[euglenaInfo.name] = server;
         server.on("connect", (socket: SocketIO.Socket) => {
-            server.emit("bind", this_.sap.euglenaInfo, (done: boolean) => {
+            server.emit("bind", this_.sapContent.euglenaInfo, (done: boolean) => {
                 if (done) {
                     this_.send(new euglena_template.being.alive.particle.ConnectedToEuglena(euglenaInfo, this_.name));
                 }
@@ -259,7 +267,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
                     }
                 };
                 let httpConnector = new HttpRequestManager(post_options);
-                httpConnector.sendMessage(JSON.stringify(impact), (message:any) => {
+                httpConnector.sendMessage(JSON.stringify(impact), (message: any) => {
                     if (euglena.sys.type.StaticTools.Exception.isNotException<string>(message)) {
                         try {
                             let impactAssumption = JSON.parse(message);

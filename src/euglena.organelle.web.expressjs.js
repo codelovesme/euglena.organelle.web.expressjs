@@ -41,14 +41,20 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
-        this.addAction(euglena_template_1.euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
+    }
+    bindActions(addAction) {
+        addAction(euglena_template_1.euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
             this_.connectToEuglena(particle.content);
         });
-        this.addAction(euglena_template_1.euglena_template.being.alive.constants.particles.ThrowImpact, (particle) => {
+        addAction(euglena_template_1.euglena_template.being.alive.constants.particles.ThrowImpact, (particle) => {
             this_.throwImpact(particle.content.to, particle.content.impact);
         });
+        addAction(euglena_template_1.euglena_template.being.alive.constants.particles.WebOrganelleSap, (particle) => {
+            this_.sapContent = particle.content;
+            this_.getAlive();
+        });
     }
-    onGettingAlive() {
+    getAlive() {
         this.router.post("/", function (req, res, next) {
             let session = req.session;
             req.body.token = session.token;
@@ -135,7 +141,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
          * Listen on provided port, on all network interfaces.
          */
         let socket = io.listen(server);
-        server.listen(this.sap.euglenaInfo.port);
+        server.listen(this.sapContent.euglenaInfo.port);
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
@@ -163,9 +169,9 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         if (error.syscall !== 'listen') {
             throw error;
         }
-        var bind = typeof this_.sap.euglenaInfo.port === 'string'
-            ? 'Pipe ' + this_.sap.euglenaInfo.port
-            : 'Port ' + this_.sap.euglenaInfo.port;
+        var bind = typeof this_.sapContent.euglenaInfo.port === 'string'
+            ? 'Pipe ' + this_.sapContent.euglenaInfo.port
+            : 'Port ' + this_.sapContent.euglenaInfo.port;
         // handle specific listen errors with friendly messages
         switch (error.code) {
             case 'EACCES':
@@ -195,7 +201,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         let server = io("http://" + post_options.host + ":" + post_options.port);
         this.servers[euglenaInfo.name] = server;
         server.on("connect", (socket) => {
-            server.emit("bind", this_.sap.euglenaInfo, (done) => {
+            server.emit("bind", this_.sapContent.euglenaInfo, (done) => {
                 if (done) {
                     this_.send(new euglena_template_1.euglena_template.being.alive.particle.ConnectedToEuglena(euglenaInfo, this_.name));
                 }

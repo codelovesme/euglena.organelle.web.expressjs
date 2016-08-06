@@ -10,14 +10,17 @@
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
 import * as http from "http";
+import Particle = euglena.being.Particle;
 export declare class Organelle extends euglena_template.being.alive.organelle.WebOrganelle {
     private router;
     private server;
     private sockets;
     private servers;
     private httpConnector;
+    private sapContent;
     constructor();
-    protected onGettingAlive(): void;
+    protected bindActions(addAction: (particleName: string, action: (particle: Particle) => void) => void): void;
+    private getAlive();
     private getView(path);
     private onListening();
     private onError(error);
