@@ -141,7 +141,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
          * Listen on provided port, on all network interfaces.
          */
         let socket = io.listen(server);
-        server.listen(this.sapContent.euglenaInfo.port);
+        server.listen(this.sapContent.euglenaInfo.content.port);
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
@@ -149,6 +149,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             socket.on("bind", (euglenaInfo) => {
                 this.sockets[euglenaInfo.name] = socket;
                 this_.send(new euglena_template_1.euglena_template.being.alive.particle.ConnectedToEuglena(euglenaInfo, this_.name));
+                this_.send(euglenaInfo);
             });
             socket.on("impact", (impactAssumption) => {
                 this_.send(new euglena_template_1.euglena_template.being.alive.particle.ImpactReceived(impactAssumption, euglena_template_1.euglena_template.being.alive.constants.organelles.NetOrganelle));
@@ -169,9 +170,9 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         if (error.syscall !== 'listen') {
             throw error;
         }
-        var bind = typeof this_.sapContent.euglenaInfo.port === 'string'
-            ? 'Pipe ' + this_.sapContent.euglenaInfo.port
-            : 'Port ' + this_.sapContent.euglenaInfo.port;
+        var bind = typeof this_.sapContent.euglenaInfo.content.port === 'string'
+            ? 'Pipe ' + this_.sapContent.euglenaInfo.content.port
+            : 'Port ' + this_.sapContent.euglenaInfo.content.port;
         // handle specific listen errors with friendly messages
         switch (error.code) {
             case 'EACCES':
@@ -191,8 +192,8 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             return;
         }
         var post_options;
-        post_options.host = euglenaInfo.url;
-        post_options.port = Number(euglenaInfo.port);
+        post_options.host = euglenaInfo.content.url;
+        post_options.port = Number(euglenaInfo.content.port);
         post_options.path = "/";
         post_options.method = 'POST';
         post_options.headers = {
@@ -236,8 +237,8 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             else {
                 //TODO
                 var post_options = {
-                    host: to.url,
-                    port: Number(to.port),
+                    host: to.content.url,
+                    port: Number(to.content.port),
                     path: "/",
                     method: 'POST',
                     headers: {
