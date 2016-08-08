@@ -188,7 +188,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         }
     }
     connectToEuglena(euglenaInfo) {
-        if (this.servers[euglenaInfo.name]) {
+        if (this.servers[euglenaInfo.content.name]) {
             return;
         }
         var post_options;
@@ -200,7 +200,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             'Content-Type': 'application/json'
         };
         let server = io("http://" + post_options.host + ":" + post_options.port);
-        this.servers[euglenaInfo.name] = server;
+        this.servers[euglenaInfo.content.name] = server;
         server.on("connect", (socket) => {
             server.emit("bind", this_.sapContent.euglenaInfo, (done) => {
                 if (done) {
@@ -220,7 +220,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         });
     }
     throwImpact(to, impact) {
-        var client = this.sockets[to.name];
+        var client = this.sockets[to.content.name];
         if (client) {
             client.emit("impact", impact, (resp) => {
                 //TODO
@@ -230,7 +230,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             //TODO
             //response(new euglena_template.being.alive.particles.ExceptionOccurred(
             //  new euglena.sys.type.Exception("There is no gateway connected with that id: " + userId)));
-            let server = this.servers[to.name];
+            let server = this.servers[to.content.name];
             if (server) {
                 server.emit("impact", impact);
             }
