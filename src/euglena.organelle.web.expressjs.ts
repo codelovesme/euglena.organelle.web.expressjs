@@ -40,11 +40,11 @@ function impactReceived(impact: euglena.being.interaction.Impact, of: string) {
 }
 
 function reference(name: string, of: string) {
-    return new euglena.being.alive.dna.ParticleReference(name, of);
+    return new euglena.being.alive.dna.ParticleReference({ name: name, of: of });
 }
 
 function particle_(name: string, content: any, of: string) {
-    return new Particle(name, content, of);
+    return new Particle({ name: name, of: of }, content);
 }
 
 export class Organelle extends euglena_template.being.alive.organelle.WebOrganelle {
@@ -64,13 +64,13 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     }
     protected bindActions(addAction: (particleName: string, action: (particle: Particle) => void) => void): void {
         addAction(euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
-            this_.connectToEuglena(particle.content);
+            this_.connectToEuglena(particle.data);
         });
         addAction(euglena_template.being.alive.constants.particles.ThrowImpact, (particle) => {
-            this_.throwImpact(particle.content.to, particle.content.impact);
+            this_.throwImpact(particle.data.to, particle.data.impact);
         });
         addAction(euglena_template.being.alive.constants.particles.WebOrganelleSap, (particle) => {
-            this_.sapContent = particle.content;
+            this_.sapContent = particle.data;
             this_.getAlive();
         });
     }
@@ -128,6 +128,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             name: "websiteLoginSession",
             resave: true,
             saveUninitialized: true
+
         }));
         app.use(express.static(path.join(appDir, '../', 'public')));
         app.use('/', this.router);
@@ -163,13 +164,13 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
          * Listen on provided port, on all network interfaces.
          */
         let socket = io.listen(server);
-        server.listen(this.sapContent.euglenaInfo.content.port);
+        server.listen(this.sapContent.euglenaInfo.data.port);
         server.on('error', this.onError);
         server.on('listening', this.onListening);
         this.server = server;
         socket.on("connection", (socket: any) => {
             socket.on("bind", (euglenaInfo: euglena_template.being.alive.particle.EuglenaInfo) => {
-                this.sockets[euglenaInfo.name] = socket;
+                this.sockets[euglenaInfo.data.name] = socket;
                 this_.send(new euglena_template.being.alive.particle.ConnectedToEuglena(euglenaInfo, this_.name));
                 this_.send(euglenaInfo);
             });
@@ -193,9 +194,9 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             throw error;
         }
 
-        var bind = typeof this_.sapContent.euglenaInfo.content.port === 'string'
-            ? 'Pipe ' + this_.sapContent.euglenaInfo.content.port
-            : 'Port ' + this_.sapContent.euglenaInfo.content.port;
+        var bind = typeof this_.sapContent.euglenaInfo.data.port === 'string'
+            ? 'Pipe ' + this_.sapContent.euglenaInfo.data.port
+            : 'Port ' + this_.sapContent.euglenaInfo.data.port;
 
         // handle specific listen errors with friendly messages
         switch (error.code) {
@@ -212,19 +213,19 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         }
     }
     private connectToEuglena(euglenaInfo: euglena_template.being.alive.particle.EuglenaInfo) {
-        if (this.servers[euglenaInfo.content.name]) {
+        if (this.servers[euglenaInfo.data.name]) {
             return;
         }
         var post_options: http.RequestOptions;
-        post_options.host = euglenaInfo.content.url;
-        post_options.port = Number(euglenaInfo.content.port);
+        post_options.host = euglenaInfo.data.url;
+        post_options.port = Number(euglenaInfo.data.port);
         post_options.path = "/";
         post_options.method = 'POST';
         post_options.headers = {
             'Content-Type': 'application/json'
         };
         let server = io("http://" + post_options.host + ":" + post_options.port);
-        this.servers[euglenaInfo.content.name] = server;
+        this.servers[euglenaInfo.data.name] = server;
         server.on("connect", (socket: SocketIO.Socket) => {
             server.emit("bind", this_.sapContent.euglenaInfo, (done: boolean) => {
                 if (done) {
@@ -244,7 +245,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         });
     }
     private throwImpact(to: euglena_template.being.alive.particle.EuglenaInfo, impact: euglena.being.interaction.Impact): void {
-        var client = this.sockets[to.content.name];
+        var client = this.sockets[to.data.name];
         if (client) {
             client.emit("impact", impact, (resp: euglena.being.interaction.Impact) => {
                 //TODO
@@ -253,14 +254,14 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             //TODO
             //response(new euglena_template.being.alive.particles.ExceptionOccurred(
             //  new euglena.sys.type.Exception("There is no gateway connected with that id: " + userId)));
-            let server = this.servers[to.content.name];
+            let server = this.servers[to.data.name];
             if (server) {
                 server.emit("impact", impact);
             } else {
                 //TODO
                 var post_options = {
-                    host: to.content.url,
-                    port: Number(to.content.port),
+                    host: to.data.url,
+                    port: Number(to.data.port),
                     path: "/",
                     method: 'POST',
                     headers: {
