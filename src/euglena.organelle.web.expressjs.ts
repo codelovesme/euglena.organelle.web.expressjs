@@ -174,12 +174,14 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
                 this_.send(euglenaInfo);
             });
             socket.on("impact", (impactAssumption: euglena.being.interaction.Impact) => {
-                this_.send(new euglena_template.being.alive.particle.ImpactReceived(impactAssumption as euglena.being.interaction.Impact,this_.sapContent.euglenaName));
+                this_.send(new euglena_template.being.alive.particle.ImpactReceived(impactAssumption as euglena.being.interaction.Impact, this_.sapContent.euglenaName));
             });
         });
     }
     private getView(path: string): string {
-        return this.sapContent.singlePageApp ? "index" :(path ? path : "index");
+        return this.sapContent.singlePageApp ?
+            (path && path.split(".").length > 1 ? path : "index" ):
+            (path ? path : "index");
     }
     private onListening() {
         var addr = this_.server.address();

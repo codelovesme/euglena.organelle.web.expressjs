@@ -158,7 +158,9 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         });
     }
     getView(path) {
-        return this.sapContent.singlePageApp ? "index" : (path ? path : "index");
+        return this.sapContent.singlePageApp ?
+            (path && path.split(".").length > 1 ? path : "index") :
+            (path ? path : "index");
     }
     onListening() {
         var addr = this_.server.address();
