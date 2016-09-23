@@ -11,7 +11,6 @@
 const euglena_1 = require("euglena");
 const euglena_template_1 = require("euglena.template");
 const express = require('express');
-const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -98,7 +97,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         app.set('view engine', 'jade');
         // uncomment after placing your favicon in /public
         //app.use(favicon(path.join(__dirname,"../", 'public', 'favicon.ico')));
-        app.use(logger('dev'));
+        //app.use(logger('dev'));
         app.use(bodyParser.json({ limit: '50mb' }));
         app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
         //app.use(bodyParser.json());
