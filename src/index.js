@@ -300,4 +300,4 @@ class HttpRequestManager {
     }
 }
 exports.HttpRequestManager = HttpRequestManager;
-//# sourceMappingURL=euglena.organelle.web.expressjs.js.map
+//# sourceMappingURL=index.js.map
