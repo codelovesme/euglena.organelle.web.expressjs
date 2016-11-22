@@ -75,16 +75,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     }
     private getAlive(): void {
         this.router.post("/", function (req, res, next) {
-            let session: any = req.session;;
-            req.body.token = session.token;
             this_.send(impactReceived(req.body, this_.name), this_.name);
-        });
-        this.router.post("/auth", function (req, res, next) {
-            let session: any = req.session;
-            let token = session.token = req.body;
-            let of = session.meta.of = req.body.meta.of;
-            this_.send(new euglena_template.being.alive.particle.Session({ token: token }, of), this_.name);
-            res.send(JSON.stringify(new euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName)));
         });
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
