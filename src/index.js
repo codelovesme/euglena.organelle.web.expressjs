@@ -56,6 +56,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
     getAlive() {
         this.router.post("/", function (req, res, next) {
             let session = req.session;
+            ;
             req.body.token = session.token;
             this_.send(impactReceived(req.body, this_.name), this_.name);
         });

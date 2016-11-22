@@ -75,7 +75,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     }
     private getAlive(): void {
         this.router.post("/", function (req, res, next) {
-            let session: any = req.session;
+            let session: any = req.session;;
             req.body.token = session.token;
             this_.send(impactReceived(req.body, this_.name), this_.name);
         });
