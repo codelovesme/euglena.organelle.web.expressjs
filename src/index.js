@@ -57,11 +57,12 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             let euglenaName = req.session.euglenaName = req.session.euglenaName || uuid.v1();
             let impact = req.body;
             if (req.body) {
+                res.send(JSON.stringify(new euglena_template_1.euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName)));
                 impact.from = euglenaName;
                 this_.send(impactReceived(impact, this_.name), this_.name);
             }
             else {
-                this_.send({ meta: {}, data: {} }, this_.sapContent.euglenaName);
+                res.send({ meta: {}, data: {} }, this_.sapContent.euglenaName);
             }
         });
         /*
