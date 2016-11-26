@@ -15,6 +15,8 @@ export declare class Organelle extends euglena_template.being.alive.organelle.We
     constructor();
     protected bindActions(addAction: (particleName: string, action: (particle: Particle) => void) => void): void;
     private getAlive();
+    private getEuglenaName(session);
+    private generateEuglenaName();
     private getView(path);
     private onListening();
     private onError(error);

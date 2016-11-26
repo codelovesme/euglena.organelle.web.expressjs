@@ -78,25 +78,25 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
             let euglenaName = req.headers["host"];
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         this.router.get("/:path", function (req, res, next) {
             let domain = req.headers["host"];
             let path = req.params.path;
             let euglenaName = domain + "/" + path;
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         this.router.get("/debug/:domain", function (req, res, next) {
             let domain = req.params.domain;
             let path = req.params.path;
             let euglenaName = domain;
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         this.router.get("/debug/:domain/:path", function (req, res, next) {
             let domain = req.params.domain;
             let path = req.params.path;
             let euglenaName = domain + "/" + path;
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         let app = express();
         // view engine setup
@@ -164,6 +164,12 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
                 this_.send(new euglena_template_1.euglena_template.being.alive.particle.ImpactReceived(impactAssumption, this_.sapContent.euglenaName), this_.name);
             });
         });
+    }
+    getEuglenaName(session) {
+        return { euglenaName: session.euglenaName = session.euglenaName || uuid.v1() };
+    }
+    generateEuglenaName() {
+        return uuid.v1();
     }
     getView(path) {
         return this.sapContent.singlePageApp ?

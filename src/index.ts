@@ -4,8 +4,8 @@
 
 
 "use strict";
-import {euglena} from "euglena";
-import {euglena_template} from "euglena.template";
+import { euglena } from "euglena";
+import { euglena_template } from "euglena.template";
 
 import * as express from 'express';
 import favicon = require('serve-favicon');
@@ -46,7 +46,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     private server: http.Server = null;
     private sockets: any;
     private servers: any;
-    private sessions:Express.Session[];
+    private sessions: Express.Session[];
     private httpConnector: HttpRequestManager;
     private sapContent: euglena_template.being.alive.particle.WebOrganelleSapContent;
     constructor() {
@@ -68,7 +68,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             this_.sapContent = particle.data;
             this_.getAlive();
         });
-    }    
+    }
     private getAlive(): void {
         //SHOULD Check token
         //Should Check validation of impact
@@ -77,12 +77,12 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         this.router.post("/", function (req, res, next) {
             let euglenaName = req.session.euglenaName = req.session.euglenaName || uuid.v1();
             let impact = req.body;
-            if(req.body){
-                res.send(JSON.stringify(new euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName))); 
+            if (req.body) {
+                res.send(JSON.stringify(new euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName)));
                 impact.from = euglenaName;
                 this_.send(impactReceived(impact, this_.name), this_.name);
-            }else{
-                res.send({meta:{},data:{}},this_.sapContent.euglenaName);
+            } else {
+                res.send({ meta: {}, data: {} }, this_.sapContent.euglenaName);
             }
         });
         /*
@@ -98,25 +98,25 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
             let euglenaName = req.headers["host"];
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         this.router.get("/:path", function (req, res, next) {
             let domain = req.headers["host"];
             let path = req.params.path;
             let euglenaName = domain + "/" + path;
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         this.router.get("/debug/:domain", function (req, res, next) {
             let domain = req.params.domain;
             let path = req.params.path;
             let euglenaName = domain;
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         this.router.get("/debug/:domain/:path", function (req, res, next) {
             let domain = req.params.domain;
             let path = req.params.path;
             let euglenaName = domain + "/" + path;
-            res.render(this_.getView(path));
+            res.render(this_.getView(path), this.getEuglenaName(req.session));
         });
         let app = express();
         // view engine setup
@@ -187,6 +187,12 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
                 this_.send(new euglena_template.being.alive.particle.ImpactReceived(impactAssumption as euglena.being.interaction.Impact, this_.sapContent.euglenaName), this_.name);
             });
         });
+    }
+    private getEuglenaName(session:any): any {
+        return { euglenaName: session.euglenaName = session.euglenaName || uuid.v1() };
+    }
+    private generateEuglenaName(): string {
+        return uuid.v1();
     }
     private getView(path: string): string {
         return this.sapContent.singlePageApp ?
