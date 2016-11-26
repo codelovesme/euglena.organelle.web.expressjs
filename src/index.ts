@@ -98,25 +98,25 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
             let euglenaName = req.headers["host"];
-            res.render(this_.getView(path), this.getEuglenaName(req.session));
+            res.render(this_.getView(path), this_.getEuglenaName(req.session));
         });
         this.router.get("/:path", function (req, res, next) {
             let domain = req.headers["host"];
             let path = req.params.path;
             let euglenaName = domain + "/" + path;
-            res.render(this_.getView(path), this.getEuglenaName(req.session));
+            res.render(this_.getView(path), this_.getEuglenaName(req.session));
         });
         this.router.get("/debug/:domain", function (req, res, next) {
             let domain = req.params.domain;
             let path = req.params.path;
             let euglenaName = domain;
-            res.render(this_.getView(path), this.getEuglenaName(req.session));
+            res.render(this_.getView(path), this_.getEuglenaName(req.session));
         });
         this.router.get("/debug/:domain/:path", function (req, res, next) {
             let domain = req.params.domain;
             let path = req.params.path;
             let euglenaName = domain + "/" + path;
-            res.render(this_.getView(path), this.getEuglenaName(req.session));
+            res.render(this_.getView(path), this_.getEuglenaName(req.session));
         });
         let app = express();
         // view engine setup
