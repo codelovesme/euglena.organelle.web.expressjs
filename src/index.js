@@ -1,12 +1,5 @@
-/// <reference path="../typings/express/express.d.ts" />
-/// <reference path="../typings/socket.io/socket.io.d.ts" />
-/// <reference path="../typings/serve-favicon/serve-favicon.d.ts" />
-/// <reference path="../typings/morgan/morgan.d.ts" />
-/// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
-/// <reference path="../typings/body-parser/body-parser.d.ts" />
-/// <reference path="../typings/express-session/express-session.d.ts" />
-/// <reference path="../typings/node/node.d.ts"/>
 /// <reference path="../node_modules/euglena.template/src/index.d.ts"/>
+/// <reference path="../typings/index.d.ts"/>
 "use strict";
 const euglena_1 = require("euglena");
 const euglena_template_1 = require("euglena.template");
@@ -17,6 +10,7 @@ const session = require('express-session');
 const path = require("path");
 const http = require("http");
 const io = require("socket.io");
+const uuid = require("node-uuid");
 var Particle = euglena_1.euglena.being.Particle;
 var Exception = euglena_1.euglena.sys.type.Exception;
 const OrganelleName = "WebOrganelleImplExpressJs";
@@ -40,6 +34,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
+        this.sessions = [];
     }
     bindActions(addAction) {
         addAction(euglena_template_1.euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
@@ -54,19 +49,31 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         });
     }
     getAlive() {
+        //SHOULD Check token
+        //Should Check validation of impact
+        // should check them here because of no require sent it this kind of mass to Cytoplasm
+        // think like tcp => http => impact => particle
         this.router.post("/", function (req, res, next) {
-            let session = req.session;
-            ;
-            req.body.token = session.token;
-            this_.send(impactReceived(req.body, this_.name), this_.name);
+            let euglenaName = req.session.euglenaName = req.session.euglenaName || uuid.v1();
+            let impact = req.body;
+            if (req.body) {
+                impact.from = euglenaName;
+                this_.send(impactReceived(impact, this_.name), this_.name);
+            }
+            else {
+                this_.send({ meta: {}, data: {} }, this_.sapContent.euglenaName);
+            }
         });
+        /*
         this.router.post("/auth", function (req, res, next) {
-            let session = req.session;
-            let token = session.token = req.body;
+            let session: any = req.session;
+            let proxy = session.proxy = req.body;
             let of = session.meta.of = req.body.meta.of;
-            this_.send(new euglena_template_1.euglena_template.being.alive.particle.Session({ token: token }, of), this_.name);
-            res.send(JSON.stringify(new euglena_template_1.euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName)));
+            this_.sessions.push(session);
+            this_.send(new euglena_template.being.alive.particle.Session({ proxy: proxy }, of), this_.name);
+            res.send(JSON.stringify(new euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName)));
         });
+        */
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
             let euglenaName = req.headers["host"];
@@ -99,7 +106,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         //app.use(favicon(path.join(__dirname,"../", 'public', 'favicon.ico')));
         //app.use(logger('dev'));
         app.use(bodyParser.json({ limit: '50mb' }));
-        app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+        app.use(bodyParser.urlencoded({ extended: true }));
         //app.use(bodyParser.json());
         //app.use(bodyParser.urlencoded({ extended: false }));
         app.use(cookieParser());

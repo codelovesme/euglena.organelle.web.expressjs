@@ -1,13 +1,6 @@
 
-/// <reference path="../typings/express/express.d.ts" />
-/// <reference path="../typings/socket.io/socket.io.d.ts" />
-/// <reference path="../typings/serve-favicon/serve-favicon.d.ts" />
-/// <reference path="../typings/morgan/morgan.d.ts" />
-/// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
-/// <reference path="../typings/body-parser/body-parser.d.ts" />
-/// <reference path="../typings/express-session/express-session.d.ts" />
-/// <reference path="../typings/node/node.d.ts"/>
 /// <reference path="../node_modules/euglena.template/src/index.d.ts"/>
+/// <reference path="../typings/index.d.ts"/>
 
 
 "use strict";
@@ -23,6 +16,7 @@ import session = require('express-session');
 import * as path from "path";
 import * as http from "http";
 import * as io from "socket.io";
+import * as uuid from "node-uuid";
 import constants = euglena_template.being.alive.constants;
 import particles = euglena_template.being.alive.particle;
 
@@ -52,6 +46,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     private server: http.Server = null;
     private sockets: any;
     private servers: any;
+    private sessions:Express.Session[];
     private httpConnector: HttpRequestManager;
     private sapContent: euglena_template.being.alive.particle.WebOrganelleSapContent;
     constructor() {
@@ -60,6 +55,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         this.router = express.Router();
         this.sockets = {};
         this.servers = {};
+        this.sessions = [];
     }
     protected bindActions(addAction: (particleName: string, action: (particle: Particle) => void) => void): void {
         addAction(euglena_template.being.alive.constants.particles.ConnectToEuglena, (particle) => {
@@ -72,20 +68,32 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             this_.sapContent = particle.data;
             this_.getAlive();
         });
-    }
+    }    
     private getAlive(): void {
+        //SHOULD Check token
+        //Should Check validation of impact
+        // should check them here because of no require sent it this kind of mass to Cytoplasm
+        // think like tcp => http => impact => particle
         this.router.post("/", function (req, res, next) {
-            let session: any = req.session;;
-            req.body.token = session.token;
-            this_.send(impactReceived(req.body, this_.name), this_.name);
+            let euglenaName = req.session.euglenaName = req.session.euglenaName || uuid.v1();
+            let impact = req.body;
+            if(req.body){ 
+                impact.from = euglenaName;
+                this_.send(impactReceived(impact, this_.name), this_.name);
+            }else{
+                this_.send({meta:{},data:{}},this_.sapContent.euglenaName);
+            }
         });
+        /*
         this.router.post("/auth", function (req, res, next) {
             let session: any = req.session;
-            let token = session.token = req.body;
+            let proxy = session.proxy = req.body;
             let of = session.meta.of = req.body.meta.of;
-            this_.send(new euglena_template.being.alive.particle.Session({ token: token }, of), this_.name);
+            this_.sessions.push(session);
+            this_.send(new euglena_template.being.alive.particle.Session({ proxy: proxy }, of), this_.name);
             res.send(JSON.stringify(new euglena_template.being.alive.particle.Acknowledge(this_.sapContent.euglenaName)));
         });
+        */
         this.router.get("/", function (req, res, next) {
             let path = req.params.path;
             let euglenaName = req.headers["host"];
@@ -118,7 +126,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         //app.use(favicon(path.join(__dirname,"../", 'public', 'favicon.ico')));
         //app.use(logger('dev'));
         app.use(bodyParser.json({ limit: '50mb' }));
-        app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+        app.use(bodyParser.urlencoded({ extended: true }));
         //app.use(bodyParser.json());
         //app.use(bodyParser.urlencoded({ extended: false }));
         app.use(cookieParser());
@@ -157,7 +165,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
             });
         });
 
-        var server = http.createServer(app);
+        var server = http.createServer(app as any);
 
         /**
          * Listen on provided port, on all network interfaces.

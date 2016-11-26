@@ -1,12 +1,5 @@
-/// <reference path="../typings/express/express.d.ts" />
-/// <reference path="../typings/socket.io/socket.io.d.ts" />
-/// <reference path="../typings/serve-favicon/serve-favicon.d.ts" />
-/// <reference path="../typings/morgan/morgan.d.ts" />
-/// <reference path="../typings/cookie-parser/cookie-parser.d.ts" />
-/// <reference path="../typings/body-parser/body-parser.d.ts" />
-/// <reference path="../typings/express-session/express-session.d.ts" />
-/// <reference path="../typings/node/node.d.ts" />
 /// <reference path="../node_modules/euglena.template/src/index.d.ts" />
+/// <reference path="../typings/index.d.ts" />
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
 import * as http from "http";
@@ -16,6 +9,7 @@ export declare class Organelle extends euglena_template.being.alive.organelle.We
     private server;
     private sockets;
     private servers;
+    private sessions;
     private httpConnector;
     private sapContent;
     constructor();
