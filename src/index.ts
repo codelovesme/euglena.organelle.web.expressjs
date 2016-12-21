@@ -183,8 +183,8 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
                 this_.send(new euglena_template.being.alive.particle.ConnectedToEuglena(euglenaInfo, this_.sapContent.euglenaName), this_.name);
                 this_.send(euglenaInfo, this_.name);
             });
-            socket.on("impact", (impactAssumption: euglena.being.interaction.Impact) => {
-                this_.send(new euglena_template.being.alive.particle.ImpactReceived(impactAssumption as euglena.being.interaction.Impact, this_.sapContent.euglenaName), this_.name);
+            socket.on("impact", (impactAssumption: euglena.being.interaction.Impact,callback) => {
+                this_.send(new euglena_template.being.alive.particle.ImpactReceived(impactAssumption as euglena.being.interaction.Impact, this_.sapContent.euglenaName), this_.name,callback);
             });
         });
     }
