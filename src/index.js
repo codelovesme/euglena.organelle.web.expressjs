@@ -224,9 +224,11 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
                     this_.send(new euglena_template_1.euglena_template.being.alive.particle.ConnectedToEuglena(euglenaInfo, this_.sapContent.euglenaName), this_.name);
                 }
             });
-            server.on("impact", (impactAssumption, callback) => {
-                if (euglena_1.euglena.js.Class.instanceOf(euglena_template_1.euglena_template.reference.being.interaction.Impact, impactAssumption)) {
-                    this.send(new euglena_template_1.euglena_template.being.alive.particle.ImpactReceived(impactAssumption, this_.sapContent.euglenaName), this_.name);
+            server.on("impact", (impact, callback) => {
+                if (euglena_1.euglena.js.Class.instanceOf(euglena_template_1.euglena_template.reference.being.interaction.Impact, impact)) {
+                    this_.send(new euglena_template_1.euglena_template.being.alive.particle.ImpactReceived(impact, this_.sapContent.euglenaName), this_.name, (particle) => {
+                        callback(particle.data);
+                    });
                 }
                 else {
                 }
@@ -240,7 +242,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         var client = this.sockets[to.data.name];
         if (client) {
             client.emit("impact", impact, (resp) => {
-                //TODO
+                this_.send(new euglena_template_1.euglena_template.being.alive.particle.ImpactReceived(impact, this_.sapContent.euglenaName), this_.name);
             });
         }
         else {
@@ -249,7 +251,9 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
             //  new euglena.sys.type.Exception("There is no gateway connected with that id: " + userId)));
             let server = this.servers[to.data.name];
             if (server) {
-                server.emit("impact", impact);
+                server.emit("impact", impact, (resp) => {
+                    this_.send(new euglena_template_1.euglena_template.being.alive.particle.ImpactReceived(impact, this_.sapContent.euglenaName), this_.name);
+                });
             }
             else {
                 //TODO
