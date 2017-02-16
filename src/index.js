@@ -10,9 +10,9 @@ const path = require("path");
 const http = require("http");
 const io = require("socket.io");
 const uuid = require("node-uuid");
+var constants = euglena_template_1.euglena_template.being.alive.constants;
 var Particle = euglena_1.euglena.being.Particle;
 var Exception = euglena_1.euglena.sys.type.Exception;
-const OrganelleName = "WebOrganelleImplExpressJs";
 let organelle = null;
 let this_ = null;
 function impactReceived(impact, of) {
@@ -26,7 +26,7 @@ function particle_(name, content, of) {
 }
 class Organelle extends euglena_template_1.euglena_template.being.alive.organelle.WebOrganelle {
     constructor() {
-        super(OrganelleName);
+        super(constants.organelles.WebOrganelle);
         this.router = null;
         this.server = null;
         this_ = this;

@@ -25,7 +25,6 @@ import Exception = euglena.sys.type.Exception;
 import Impact = euglena.being.interaction.Impact;
 import ThrowImpact = euglena_template.being.alive.particle.ThrowImpact;
 
-const OrganelleName = "WebOrganelleImplExpressJs";
 let organelle: Organelle = null;
 
 let this_: Organelle = null;
@@ -51,7 +50,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
     private httpConnector: HttpRequestManager;
     private sapContent: euglena_template.being.alive.particle.WebOrganelleSapContent;
     constructor() {
-        super(OrganelleName);
+        super(constants.organelles.WebOrganelle);
         this_ = this;
         this.router = express.Router();
         this.sockets = {};
