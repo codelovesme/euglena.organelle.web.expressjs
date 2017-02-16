@@ -15,7 +15,7 @@ import session = require('express-session');
 import * as path from "path";
 import * as http from "http";
 import * as io from "socket.io";
-import * as uuid from "node-uuid";
+import * as uuid from "uuid";
 import constants = euglena_template.being.alive.constants;
 import particles = euglena_template.being.alive.particle;
 
