@@ -1,12 +1,11 @@
-/// <reference path="../node_modules/euglena.template/src/index.d.ts"/>
 /// <reference path="../typings/index.d.ts"/>
 "use strict";
 const euglena_1 = require("euglena");
 const euglena_template_1 = require("euglena.template");
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const session = require('express-session');
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const session = require("express-session");
 const path = require("path");
 const http = require("http");
 const io = require("socket.io");
@@ -102,7 +101,7 @@ class Organelle extends euglena_template_1.euglena_template.being.alive.organell
         // view engine setup
         let appDir = path.dirname(require.main.filename);
         app.set('views', path.join(appDir, '../', 'views'));
-        app.set('view engine', 'jade');
+        app.set('view engine', 'pug');
         // uncomment after placing your favicon in /public
         //app.use(favicon(path.join(__dirname,"../", 'public', 'favicon.ico')));
         //app.use(logger('dev'));

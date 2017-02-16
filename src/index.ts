@@ -1,5 +1,4 @@
 
-/// <reference path="../node_modules/euglena.template/src/index.d.ts"/>
 /// <reference path="../typings/index.d.ts"/>
 
 
@@ -124,7 +123,7 @@ export class Organelle extends euglena_template.being.alive.organelle.WebOrganel
         // view engine setup
         let appDir = path.dirname(require.main.filename);
         app.set('views', path.join(appDir, '../', 'views'));
-        app.set('view engine', 'jade');
+        app.set('view engine', 'pug');
         // uncomment after placing your favicon in /public
         //app.use(favicon(path.join(__dirname,"../", 'public', 'favicon.ico')));
         //app.use(logger('dev'));

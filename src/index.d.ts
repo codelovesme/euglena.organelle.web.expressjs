@@ -1,4 +1,3 @@
-/// <reference path="../node_modules/euglena.template/src/index.d.ts" />
 /// <reference path="../typings/index.d.ts" />
 import { euglena } from "euglena";
 import { euglena_template } from "euglena.template";
